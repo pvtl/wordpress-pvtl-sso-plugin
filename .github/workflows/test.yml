@@ -21,7 +21,7 @@ jobs:
       - name: PHPCS
         run: |
             phpcs --config-set show_warnings 0
-            phpcs
+            phpcs ./**/*.php
 
       # - name: PHPUnit
       #   run: php -d memory_limit=-1 ./vendor/bin/phpunit
