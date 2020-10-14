@@ -1,0 +1,27 @@
+name: Tests
+on: push
+
+jobs:
+  # PHP Tests
+  # ---------------------------------------------------------------
+  php:
+    name: PHP Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+
+      - name: Install dependencies
+        run: |
+            composer global require squizlabs/php_codesniffer wp-coding-standards/wpcs
+            phpcs --config-set installed_paths /home/runner/.composer/vendor/wp-coding-standards/wpcs
+
+      - name: PHPCS
+        run: |
+            phpcs --config-set show_warnings 0
+            phpcs
+
+      # - name: PHPUnit
+      #   run: php -d memory_limit=-1 ./vendor/bin/phpunit
