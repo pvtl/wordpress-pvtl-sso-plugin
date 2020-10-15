@@ -44,7 +44,7 @@ class PVTLSSO {
 	 *
 	 * @var string
 	 */
-	protected $verify_token_url = 'http://projects2.nbm.is/sso/check_token.php';
+	protected $verify_token_url = 'https://projects2.nbm.is/sso/check_token.php';
 
 	/**
 	 * Constructor
@@ -121,13 +121,17 @@ class PVTLSSO {
 			: null;
 
 		// Success at SSO.
-		if ( ! empty( $body ) && true === $body->success ) {
+		if ( ! empty( $body->member->email ) && true === $body->success ) {
+			// If the user exists, this'll be a user object, otherwise empty.
+			$user = get_user_by( 'email', $body->member->email );
+
 			// Create user if it doesn't exist.
-			if ( ! $this->email_exists_as_user( $body->member->email ) ) {
-				$this->create_user( $body->member->email, $body->member->name );
+			if ( empty( $user ) ) {
+				$user = $this->create_user( $body->member->name, $body->member->email );
 			}
 
-			return $this->login_as_email( $body->member->email );
+			// Login and redirect to the dashboard.
+			$this->login_as_user( $user );
 		}
 
 		// Wasn't successful at SSO - Show error message on wp-login.php.
@@ -135,37 +139,63 @@ class PVTLSSO {
 	}
 
 	/**
-	 * Does the email provided, exist as a user?
+	 * Based on an email, login as that user.
 	 *
-	 * @param str $email - the email check.
-	 * @return bool
+	 * @param WP_User $user - the user object.
+	 * @return void - redirects to the dashboard.
 	 */
-	private function email_exists_as_user( $email = '' ) {
-		return true;
+	private function login_as_user( $user ) {
+		wp_signon(
+			array(
+				'user_login' => $user->user_login,
+				// We'll rotate the password, to prevent users manually changing it to get past SSO.
+				'user_password' => $this->rotate_password( $user ),
+			)
+		);
+
+		wp_redirect( admin_url() );
 	}
 
 	/**
-	 * Based on an email, login as that user.
+	 * Create a new user.
 	 *
-	 * @param str $email - the email to login as.
+	 * @param str $name - name of the new user.
+	 * @param str $email - email of the new user.
+	 * @return WP_User $user - the user object.
 	 */
-	private function login_as_email( $email = '' ) {
-		// todo: rotate password
-		// todo: redirect to admin
-		return true;
+	private function create_user( $name = 'Pivotal', $email ) {
+		// Create a unique username
+		// - Some security plugins require email & username to be unique
+		// - We make it super unique to prevent extra logic in checking if a username exists
+		// - Sometimes the member name doesn't come back from SSO.
+		$username = sprintf(
+			'pvtl-%s-%s',
+			preg_replace( '/[^a-z]/', '', strtolower( $name ) ),
+			time()
+		);
+		$password = wp_generate_password( 24 );
+
+		// Create the user.
+		$id = wp_create_user( $username, $password, $email );
+
+		// Set the role to admin.
+		$user = new \WP_User( $id );
+		$user->set_role( 'admin' );
+
+		return $user;
 	}
 
 	/**
-	 * Based on an email, login as that user.
+	 * Changes a user's password to something strong and unique.
 	 *
-	 * @param str $email - the email of the new user.
-	 * @param str $name - the name of the new user.
-	 * @return void
+	 * @param WP_User $user - the user object.
+	 * @return null|str
 	 */
-	private function create_user( $email = '', $name = '' ) {
-		// Don't redirect if it doesn't work.
-		// Login as email will do its thing.
-		return true;
+	private function rotate_password( $user ) {
+		$password = wp_generate_password( 24 );
+		wp_set_password( $password, $user->ID );
+
+		return $password;
 	}
 }
 
