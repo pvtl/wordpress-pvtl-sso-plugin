@@ -180,7 +180,7 @@ class PVTLSSO {
 
 		// Set the role to admin.
 		$user = new \WP_User( $id );
-		$user->set_role( 'admin' );
+		$user->set_role( 'administrator' );
 
 		return $user;
 	}
