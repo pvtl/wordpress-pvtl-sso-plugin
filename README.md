@@ -18,9 +18,25 @@ Utilising https://sso.pvtl.io - this is a Wordpress Authentication plugin, that 
 # 1. Get it ready (to use a repo outside of packagist)
 composer config repositories.pvtl-sso git https://github.com/pvtl/wordpress-pvtl-sso-plugin
 
-# 2. Install the Plugin
+# 2. Install the Plugin - we want all updates from this major version (while non-breaking)
 composer require "pvtl/pvtl-sso:~1.0"
 
 # 3. Activate the plugin
 wp plugin activate pvtl-sso --allow-root
 ```
+
+## Versioning
+
+_Do not manually create tags_.
+
+Versioning comprises of 2 things:
+
+- Wordpress plugin version
+    - The version number used by Wordpress on the plugins screen (and various other peices of functionality to track the version number)
+    - Controlled in `./pvtl-sso.php` by `* Version: x.x.x` (line 10)
+- Composer dependency version
+    - The version Composer uses to know which version of the plugin to install
+    - Controlled by Git tags
+
+Versioning for this plugin is automated using a Github Action (`./.github/workflows/version-update.yml`).
+To release a new version, simply change the `* Version: x.x.x` (line 10) in `./pvtl-sso.php` - the Github Action will take care of the rest.
