@@ -110,7 +110,8 @@ class PvtlSso {
 	}
 
 	/**
-	 * Is the current URL wp-login.php?
+	 * If the current URL wp-login.php with a token, verify that token to login
+	 * - eg. /wp/wp-login.php?token=123ABC
 	 *
 	 * @return void
 	 */
@@ -133,7 +134,7 @@ class PvtlSso {
 	}
 
 	/**
-	 * When an SSO token is returned to wp-login.php, authenticate
+	 * When an SSO token is returned to wp-login.php, verify & authenticate
 	 *
 	 * @param str $token - the token to auth with.
 	 */
@@ -142,6 +143,7 @@ class PvtlSso {
 			return $this->set_error( 'Token is missing' );
 		}
 
+		// Send the token to our remote SSO server to verify.
 		$response = wp_remote_post(
 			$this->verify_token_url,
 			array(
@@ -154,7 +156,7 @@ class PvtlSso {
 			)
 		);
 
-		// Decode response.
+		// Decode the response.
 		$body = ( ! empty( $response ) && ! empty( $response['body'] ) )
 			? json_decode( $response['body'] )
 			: null;
@@ -165,7 +167,7 @@ class PvtlSso {
 
 		// Success at SSO.
 		if ( ! empty( $body->member->email ) && true === $body->success ) {
-			// Keep this data accessible across methods.
+			// Keep this data accessible across methods, regardless of the case (it's used in both cases).
 			$this->user_email     = $body->member->email;
 			$this->user_name      = $body->member->name ?: 'Pivotal Agency';
 			$exploded_name        = explode( ' ', $this->user_name, 2 );
@@ -177,17 +179,17 @@ class PvtlSso {
 				substr( $this->user_lastname, 0, 1 ),
 			);
 
-			// If the user exists, this'll be a user object, otherwise it'll be empty.
+			// If the user exists, this'll be a WP_User object, otherwise it'll be empty.
 			$user = get_user_by( 'email', $this->user_email );
 
-			// Create user if it doesn't exist.
+			// Create user when the user doesn't yet exist.
 			if ( empty( $user ) || ! ( $user instanceof \WP_User ) ) {
 				$user = $this->create_user();
 			}
 
 			// An unknown error has occured if $user still doesn't exist.
 			if ( empty( $user ) || ! ( $user instanceof \WP_User ) ) {
-				return $this->set_error( 'Cannot find or create user' );
+				return $this->set_error( 'Cannot find nor create user' );
 			}
 
 			// Login and redirect to the dashboard.
@@ -199,7 +201,7 @@ class PvtlSso {
 	}
 
 	/**
-	 * Based on an email, login as that user.
+	 * Based on a WP_User object, login as that user.
 	 *
 	 * @param WP_User $user - the user object.
 	 * @return void|bool - redirects to the dashboard.
@@ -209,13 +211,13 @@ class PvtlSso {
 			return $this->set_error( 'User is missing from login_as_user()' );
 		}
 
-		// Login!
+		// Login.
 		$logged_in_as = wp_signon(
 			array(
 				'user_login'    => $user->user_login,
 				// We'll rotate the password, to prevent users manually changing it to get past SSO.
 				'user_password' => $this->rotate_password( $user->ID ),
-			)
+			),
 		);
 
 		if ( empty( $logged_in_as ) || ! ( $logged_in_as instanceof \WP_User ) ) {
@@ -224,11 +226,11 @@ class PvtlSso {
 
 		// Update the user on each login, to keep the user's data up to date.
 		if ( ! $this->update_user( $user->ID ) ) {
-			return false; // Error message was set in update_user().
+			return false; // Error message was set in the update_user() call.
 		}
 
 		// Redirect to dashboard.
-		// If something didn't go right, it'll just return to wp-login.php.
+		// If something didn't go right, it'll just return to wp-login.php. No biggy.
 		return wp_redirect( admin_url() );
 	}
 
@@ -239,15 +241,14 @@ class PvtlSso {
 	 */
 	private function create_user() {
 		if ( empty( $this->user_email ) || empty( $this->user_firstname ) || empty( $this->user_lastname ) ) {
-			return $this->set_error( 'User email/name is missing from create_user()' );
+			return $this->set_error( 'User email/name is missing for create_user()' );
 		}
 
 		$password = wp_generate_password( 24 );
 
 		// Create a unique username
-		// - Some security plugins require email & username to be unique
-		// - We make it super unique to prevent extra logic in checking if a username exists
-		// - Sometimes the member name doesn't come back from SSO.
+		// - Some security plugins require email & username to be unique (can't be email)
+		// - We make it super unique to prevent extra logic in checking if a username exists.
 		$username = sprintf(
 			'pvtl-%s-%s',
 			preg_replace(
@@ -260,21 +261,20 @@ class PvtlSso {
 
 		// Create the user.
 		$id = wp_create_user( $username, $password, $this->user_email );
-
-		// Set the role to admin.
 		$user = new \WP_User( $id );
 
 		if ( empty( $user->ID ) || ! ( $user instanceof \WP_User ) ) {
-			return $this->set_error( 'User is empty after creating' );
+			return $this->set_error( 'User does not exist after creating' );
 		}
 
+		// Set the role to admin.
 		$user->set_role( 'administrator' );
 
 		return $user;
 	}
 
 	/**
-	 * Keep the user's data up to date, from SSO
+	 * Keep the user's data up to date with SSO
 	 *
 	 * @param int $user_id - The user's ID.
 	 * @return void|bool
