@@ -1,0 +1,34 @@
+name: Update WP plugin version to match Git tag
+
+on:
+  push:
+    tags:
+      - 0.*
+      - 1.*
+      - 2.*
+      - 3.*
+
+jobs:
+    resources:
+        name: Update plugin version
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v1
+            - name: Set output
+              id: vars
+              run: echo ::set-output name=tag::${GITHUB_REF#refs/*/}
+            - name: Check output
+              env:
+                  RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
+            - name: Update Version
+              run: |
+                  VERSION_LINE=$(grep "* Version: " pvtl-sso.php)
+                  sed -i "s/"${VERSION_LINE}"/ Version:         "${RELEASE_VERSION}"/" pvtl-sso.php
+                  echo $VERSION_LINE
+                  echo $RELEASE_VERSION
+            - name: Update resources
+              uses: test-room-7/action-update-file@v1
+              with:
+                  file-path: pvtl-sso.pvtl
+                  commit-msg: Update plugin version to ${VERSION_LINE}
+                  github-token: ${{ secrets.MATTM_ACCESS_TOKEN }}

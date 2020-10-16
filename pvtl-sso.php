@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         0.1.0
+ * Version:         1.0.0
  *
  * @package         PVTL_SSO
  */
@@ -17,7 +17,7 @@ namespace App\Plugins\Pvtl;
 /**
  * Pivotal Agency Single Sign On Plugin
  */
-class PVTLSSO {
+class PvtlSso {
 	/**
 	 * The name of the plugin (for cosmetic purposes).
 	 *
@@ -338,4 +338,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;  // Exit if accessed directly.
 }
 
-new PVTLSSO();
+new PvtlSso();
