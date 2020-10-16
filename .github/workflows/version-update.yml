@@ -1,12 +1,6 @@
 name: Update WP plugin version to match Git tag
 
-on:
-  push:
-    tags:
-      - 0.*
-      - 1.*
-      - 2.*
-      - 3.*
+on: push
 
 jobs:
     tag-new-versions:
