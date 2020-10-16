@@ -15,8 +15,12 @@ Utilising https://sso.pvtl.io - this is a Wordpress Authentication plugin, that 
 ## Installation
 
 ```bash
-# 1. Clone the plugin into ./web/app/plugins/pvtl-sso
-git clone git@github.com:pvtl/wordpress-pvtl-sso-plugin.git web/app/plugins/pvtl-sso
+# 1. Get it ready (to use a repo outside of packagist)
+composer config repositories.pvtl-sso git https://github.com/pvtl/wordpress-pvtl-sso-plugin
 
-# 2. Activate the plugin
+# 2. Install the Plugin
+composer require "pvtl/pvtl-sso:~1.0"
+
+# 3. Activate the plugin
+wp plugin activate pvtl-sso --allow-root
 ```
