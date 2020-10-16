@@ -21,9 +21,7 @@ jobs:
       - name: PHPCS
         run: |
             phpcs --config-set show_warnings 0
-            pwd
-            ls
-            phpcs --standard=phpcs.xml pvtl-sso.php
+            phpcs
 
       # - name: PHPUnit
       #   run: php -d memory_limit=-1 ./vendor/bin/phpunit
