@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.0.0
+ * Version:         1.0.5
  *
  * @package         PVTL_SSO
  */
