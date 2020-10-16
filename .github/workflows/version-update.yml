@@ -20,8 +20,8 @@ jobs:
             - name: Update Version
               env:
                   RELEASE_VERSION: ${{ steps.vars.outputs.tag }}
-                  VERSION_LINE: $(grep "* Version: " pvtl-sso.php)
               run: |
+                  VERSION_LINE=$(grep "* Version: " pvtl-sso.php)
                   sed -i "s/"${VERSION_LINE}"/ Version:         "${RELEASE_VERSION}"/" pvtl-sso.php
                   echo $VERSION_LINE
                   echo $RELEASE_VERSION
