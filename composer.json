@@ -1,0 +1,17 @@
+{
+  "name": "pvtl/pvtl-sso",
+  "description": "SSO for Pivotal Agency staff, to login to WordPress with minimal effort",
+  "homepage": "https://github.com/pvtl/pvtl-sso",
+  "license": "Private",
+  "authors": [
+    {
+      "name": "Matt McNamee",
+      "email": "matt.m@pvtl.io",
+      "homepage": "https://www.pivotalagency.com.au/"
+    }
+  ],
+  "type": "wordpress-plugin",
+  "require": {
+    "php": ">=7.3"
+  }
+}
