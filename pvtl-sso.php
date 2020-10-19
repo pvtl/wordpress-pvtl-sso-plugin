@@ -30,7 +30,7 @@ class PvtlSso {
 	 *
 	 * @var string
 	 */
-	protected $intercept_when = 'pvtl';
+	protected $intercept_when = 'pvtladmin';
 
 	/**
 	 * The URL to access SSO application.
@@ -97,12 +97,11 @@ class PvtlSso {
 	 * @param string                $username - username used to login.
 	 * @param string                $password - password used to login.
 	 */
-	public function if_pvtl_go_sso( $user, $username, $password = '' ) {
+	public function if_pvtl_go_sso( $user, $username = '', $password = '' ) {
 		// Is a Pivotal user. Redirect to SSO app.
-		if ( $this->intercept_when === $username ) {
-			$return_url = ( isset( $_SERVER['HTTPS'] ) && 'on' === $_SERVER['HTTPS'] ? 'https' : 'http' ) . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-
-			return header( sprintf( 'location: %s?return=%s', $this->fetch_token_url, $return_url ) );
+		if ( $this->intercept_when === $username && $this->intercept_when === $password ) {
+			return header( sprintf( 'location: %s?return=%s', $this->fetch_token_url, wp_login_url() ) );
+			exit();
 		}
 
 		// Not a Pivotal user, continue on your merry way.
@@ -116,20 +115,9 @@ class PvtlSso {
 	 * @return void
 	 */
 	public function check_wplogin_token() {
-		// Does a token URL param exist?
-		if ( ! empty( $_GET['token'] ) ) {
-			// It does. Is the current page wp-login?
-			// Taken from a highly voted stackoverflow answer.
-			$abs_path       = str_replace( array( '\\', '/' ), DIRECTORY_SEPARATOR, ABSPATH );
-			$included_files = get_included_files();
-			$page_now = $GLOBALS['pagenow']; // phpcs:ignore
-
-			$is_wplogin = ( ( in_array( $abs_path . 'wp-login.php', $included_files ) || in_array( $abs_path . 'wp-register.php', $included_files ) ) || ( isset( $page_now ) && 'wp-login.php' === $page_now ) || '/wp-login.php' === $_SERVER['PHP_SELF'] );
-
-			// We have a token on wp-login.php. Verify the token.
-			if ( $is_wplogin ) {
-				$this->verify_sso_token( $_GET['token'] );
-			}
+		// We have a token on wp-login.php. Verify the token.
+		if ( ! empty( $_GET['token'] ) && $this->is_wp_login() ) {
+			$this->verify_sso_token( $_GET['token'] );
 		}
 	}
 
@@ -232,6 +220,7 @@ class PvtlSso {
 		// Redirect to dashboard.
 		// If something didn't go right, it'll just return to wp-login.php. No biggy.
 		return wp_redirect( admin_url() );
+		exit();
 	}
 
 	/**
@@ -260,7 +249,7 @@ class PvtlSso {
 		);
 
 		// Create the user.
-		$id = wp_create_user( $username, $password, $this->user_email );
+		$id   = wp_create_user( $username, $password, $this->user_email );
 		$user = new \WP_User( $id );
 
 		if ( empty( $user->ID ) || ! ( $user instanceof \WP_User ) ) {
@@ -316,6 +305,20 @@ class PvtlSso {
 	}
 
 	/**
+	 * Checks if the current page is wp-login.php
+	 * - Seem convoluted, but taken from a highly voted stackoverflow answer.
+	 *
+	 * @return bool
+	 */
+	private function is_wp_login() {
+		$abs_path       = str_replace( array( '\\', '/' ), DIRECTORY_SEPARATOR, ABSPATH );
+		$included_files = get_included_files();
+        $page_now       = $GLOBALS['pagenow']; // phpcs:ignore
+
+		return ( ( in_array( $abs_path . 'wp-login.php', $included_files ) || in_array( $abs_path . 'wp-register.php', $included_files ) ) || ( isset( $page_now ) && 'wp-login.php' === $page_now ) || '/wp-login.php' === $_SERVER['PHP_SELF'] );
+	}
+
+	/**
 	 * Set an error message for wp-login.php
 	 *
 	 * @param str $message - The error message.
@@ -335,7 +338,7 @@ class PvtlSso {
 }
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;  // Exit if accessed directly.
+	exit();  // Exit if accessed directly.
 }
 
 new PvtlSso();
