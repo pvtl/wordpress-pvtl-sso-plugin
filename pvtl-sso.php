@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.1.0
+ * Version:         1.1.1
  *
  * @package         PVTL_SSO
  */
@@ -164,7 +164,7 @@ class PvtlSso {
 			$this->user_nickname  = sprintf(
 				'%s %s (Pivotal Agency)',
 				$this->user_firstname,
-				substr( $this->user_lastname, 0, 1 ),
+				substr( $this->user_lastname, 0, 1 )
 			);
 
 			// If the user exists, this'll be a WP_User object, otherwise it'll be empty.
