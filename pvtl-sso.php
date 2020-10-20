@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.1.1
+ * Version:         1.1.2
  *
  * @package         PVTL_SSO
  */
@@ -205,7 +205,7 @@ class PvtlSso {
 				'user_login'    => $user->user_login,
 				// We'll rotate the password, to prevent users manually changing it to get past SSO.
 				'user_password' => $this->rotate_password( $user->ID ),
-			),
+			)
 		);
 
 		if ( empty( $logged_in_as ) || ! ( $logged_in_as instanceof \WP_User ) ) {
@@ -243,7 +243,7 @@ class PvtlSso {
 			preg_replace(
 				'/[^a-z]/',
 				'',
-				strtolower( $this->user_firstname . substr( $this->user_lastname, 0, 1 ) ),
+				strtolower( $this->user_firstname . substr( $this->user_lastname, 0, 1 ) )
 			),
 			time()
 		);
@@ -281,7 +281,7 @@ class PvtlSso {
 				'nickname'     => $this->user_nickname,
 				'display_name' => $this->user_nickname,
 				'user_url'     => 'https://www.pivotalagency.com.au',
-			),
+			)
 		);
 
 		if ( ! is_int( $id_of_updated_user ) ) {
