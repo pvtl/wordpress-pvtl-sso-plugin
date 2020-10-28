@@ -199,18 +199,11 @@ class PvtlSso {
 			return $this->set_error( 'User is missing from login_as_user()' );
 		}
 
-		// Login.
-		$logged_in_as = wp_signon(
-			array(
-				'user_login'    => $user->user_login,
-				// We'll rotate the password, to prevent users manually changing it to get past SSO.
-				'user_password' => $this->rotate_password( $user->ID ),
-			)
-		);
+		// We'll rotate the password, to prevent users manually changing it to get past SSO.
+		$this->rotate_password( $user->ID );
 
-		if ( empty( $logged_in_as ) || ! ( $logged_in_as instanceof \WP_User ) ) {
-			return $this->set_error( 'User is empty after attempting log in' );
-		}
+		// Login.
+		wp_set_auth_cookie( $user->ID, true );
 
 		// Update the user on each login, to keep the user's data up to date.
 		if ( ! $this->update_user( $user->ID ) ) {
@@ -219,7 +212,7 @@ class PvtlSso {
 
 		// Redirect to dashboard.
 		// If something didn't go right, it'll just return to wp-login.php. No biggy.
-		return wp_redirect( admin_url() );
+		wp_redirect( admin_url() );
 		exit();
 	}
 
