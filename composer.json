@@ -10,7 +10,7 @@
       "homepage": "https://www.pivotalagency.com.au/"
     }
   ],
-  "type": "wordpress-plugin",
+  "type": "wordpress-muplugin",
   "require": {
     "php": ">=7.3"
   }
