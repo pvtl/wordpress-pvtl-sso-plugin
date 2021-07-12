@@ -200,10 +200,13 @@ class PvtlSso {
 		}
 
 		// We'll rotate the password, to prevent users manually changing it to get past SSO.
-		$this->rotate_password( $user->ID );
+		$password = $this->rotate_password( $user->ID );
 
 		// Login.
 		wp_set_auth_cookie( $user->ID, true );
+
+		// Make sure any other (eg. plugin's) hooks are fired after we're logged in (eg. logging).
+		apply_filters( 'authenticate', $user, $user->user_login, $password );
 
 		// Update the user on each login, to keep the user's data up to date.
 		if ( ! $this->update_user( $user->ID ) ) {
