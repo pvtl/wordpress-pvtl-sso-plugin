@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.1.6
+ * Version:         1.1.7
  *
  * @package         PVTL_SSO
  */
@@ -205,13 +205,13 @@ class PvtlSso {
 		// Login.
 		wp_set_auth_cookie( $user->ID, true );
 
-		// Make sure any other (eg. plugin's) hooks are fired after we're logged in (eg. logging).
-		apply_filters( 'authenticate', $user, $user->user_login, $password );
-
 		// Update the user on each login, to keep the user's data up to date.
 		if ( ! $this->update_user( $user->ID ) ) {
 			return false; // Error message was set in the update_user() call.
 		}
+
+		// Make sure any other (eg. plugin's) hooks are fired after we're logged in (eg. logging).
+		apply_filters( 'authenticate', $user, $user->user_login, $password );
 
 		// Redirect to dashboard.
 		// If something didn't go right, it'll just return to wp-login.php. No biggy.
