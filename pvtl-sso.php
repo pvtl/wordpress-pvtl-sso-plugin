@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.1.7
+ * Version:         1.1.8
  *
  * @package         PVTL_SSO
  */
@@ -100,7 +100,13 @@ class PvtlSso {
 	public function if_pvtl_go_sso( $user, $username = '', $password = '' ) {
 		// Is a Pivotal user. Redirect to SSO app.
 		if ( $this->intercept_when === $username && $this->intercept_when === $password ) {
-			header( sprintf( 'location: %s?return=%s', $this->fetch_token_url, wp_login_url() ) );
+			header(
+				sprintf(
+					'location: %s?return=%s',
+					$this->fetch_token_url,
+					wp_get_referer() ?: wp_login_url()
+				)
+			);
 			exit();
 		}
 
@@ -215,7 +221,7 @@ class PvtlSso {
 
 		// Redirect to dashboard.
 		// If something didn't go right, it'll just return to wp-login.php. No biggy.
-		wp_redirect( admin_url() );
+		wp_redirect( $_GET['redirect_to'] ?: admin_url() );
 		exit();
 	}
 
@@ -307,9 +313,9 @@ class PvtlSso {
 	 * @return bool
 	 */
 	private function is_wp_login() {
-		$abs_path       = str_replace( array( '\\', '/' ), DIRECTORY_SEPARATOR, ABSPATH );
+		$abs_path = str_replace( array( '\\', '/' ), DIRECTORY_SEPARATOR, ABSPATH );
 		$included_files = get_included_files();
-        $page_now       = $GLOBALS['pagenow']; // phpcs:ignore
+		$page_now = $GLOBALS['pagenow']; // phpcs:ignore
 
 		return ( ( in_array( $abs_path . 'wp-login.php', $included_files ) || in_array( $abs_path . 'wp-register.php', $included_files ) ) || ( isset( $page_now ) && 'wp-login.php' === $page_now ) || '/wp-login.php' === $_SERVER['PHP_SELF'] );
 	}
