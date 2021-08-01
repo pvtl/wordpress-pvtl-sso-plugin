@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.1.8
+ * Version:         1.1.9
  *
  * @package         PVTL_SSO
  */
@@ -221,7 +221,7 @@ class PvtlSso {
 
 		// Redirect to dashboard.
 		// If something didn't go right, it'll just return to wp-login.php. No biggy.
-		wp_redirect( $_GET['redirect_to'] ?: admin_url() );
+		wp_redirect( $_GET['redirect_to'] ?? admin_url() );
 		exit();
 	}
 
