@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.1.9
+ * Version:         1.1.10
  *
  * @package         PVTL_SSO
  */
@@ -130,7 +130,7 @@ class PvtlSso {
 	/**
 	 * When an SSO token is returned to wp-login.php, verify & authenticate
 	 *
-	 * @param str $token - the token to auth with.
+	 * @param string $token - the token to auth with.
 	 */
 	private function verify_sso_token( $token ) {
 		if ( empty( $token ) ) {
@@ -317,7 +317,9 @@ class PvtlSso {
 		$included_files = get_included_files();
 		$page_now = $GLOBALS['pagenow']; // phpcs:ignore
 
-		return ( ( in_array( $abs_path . 'wp-login.php', $included_files ) || in_array( $abs_path . 'wp-register.php', $included_files ) ) || ( isset( $page_now ) && 'wp-login.php' === $page_now ) || '/wp-login.php' === $_SERVER['PHP_SELF'] );
+		$is_wp_login = ( ( in_array( $abs_path . 'wp-login.php', $included_files ) || in_array( $abs_path . 'wp-register.php', $included_files ) ) || ( isset( $page_now ) && 'wp-login.php' === $page_now ) || '/wp-login.php' === $_SERVER['PHP_SELF'] );
+
+		return apply_filters( 'pvtl_sso_is_wp_login', $is_wp_login );
 	}
 
 	/**
