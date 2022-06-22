@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.1.10
+ * Version:         1.1.11
  *
  * @package         PVTL_SSO
  */
@@ -100,11 +100,13 @@ class PvtlSso {
 	public function if_pvtl_go_sso( $user, $username = '', $password = '' ) {
 		// Is a Pivotal user. Redirect to SSO app.
 		if ( $this->intercept_when === $username && $this->intercept_when === $password ) {
+			$return_url = apply_filters( 'pvtl_sso_return_url', wp_get_referer() ?: wp_login_url() );
+
 			header(
 				sprintf(
 					'location: %s?return=%s',
 					$this->fetch_token_url,
-					wp_get_referer() ?: wp_login_url()
+					$return_url
 				)
 			);
 			exit();
