@@ -7,7 +7,7 @@
  * Author URI:      http://pivotal.agency
  * Text Domain:     pvtl-sso
  * Domain Path:     /languages
- * Version:         1.1.11
+ * Version:         1.1.12
  *
  * @package         PVTL_SSO
  */
@@ -153,7 +153,7 @@ class PvtlSso {
 		);
 
 		// Decode the response.
-		$body = ( ! empty( $response ) && ! empty( $response['body'] ) )
+		$body = ( ! is_wp_error( $response ) && ! empty( $response['body'] ) )
 			? json_decode( $response['body'] )
 			: null;
 
