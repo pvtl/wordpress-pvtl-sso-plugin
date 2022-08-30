@@ -20,9 +20,6 @@ composer config repositories.pvtl-sso git https://github.com/pvtl/wordpress-pvtl
 
 # 2. Install the Plugin - we want all updates from this major version (while non-breaking)
 composer require "pvtl/pvtl-sso:~1.0"
-
-# 3. Activate the plugin
-wp plugin activate pvtl-sso --allow-root
 ```
 
 ## Versioning
